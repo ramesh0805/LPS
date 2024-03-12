@@ -1,0 +1,126 @@
+package Com.Aishu;
+import java.util.Scanner;
+public class LA {
+    static boolean isDelimiter(char ch) {
+        return ch == ' ' || ch == '+' || ch == '-' || ch == '*' ||
+                ch == '/' || ch == ',' || ch == ';' || ch == '>' ||
+                ch == '<' || ch == '=' || ch == '(' || ch == ')' ||
+                ch == '[' || ch == ']' || ch == '{' || ch == '}';
+    }
+
+    static boolean isOperator(char ch) {
+        return ch == '+' || ch == '-' || ch == '*' ||
+                ch == '/' || ch == '>' || ch == '<' ||
+                ch == '=';
+    }
+
+    static boolean validIdentifier(String str) {
+        if (str.length() == 0 ||
+                isDelimiter(str.charAt(0)) ||
+                Character.isDigit(str.charAt(0)))
+            return false;
+        return true;
+    }
+
+    static boolean isKeyword(String str) {
+        switch (str) {
+            case "if":
+            case "else":
+            case "while":
+            case "do":
+            case "break":
+            case "continue":
+            case "int":
+            case "double":
+            case "float":
+            case "return":
+            case "char":
+            case "case":
+            case "sizeof":
+            case "long":
+            case "short":
+            case "typedef":
+            case "switch":
+            case "unsigned":
+            case "void":
+            case "static":
+            case "struct":
+            case "goto":
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    static boolean isInteger(String str) {
+        int len = str.length();
+        if (len == 0)
+            return false;
+        for (int i = 0; i < len; i++) {
+            if (!(Character.isDigit(str.charAt(i))) ||
+                    (str.charAt(i) == '-' && i > 0))
+                return false;
+        }
+        return true;
+    }
+
+    static boolean isRealNumber(String str) {
+        int len = str.length();
+        boolean hasDecimal = false;
+        if (len == 0)
+            return false;
+        for (int i = 0; i < len; i++) {
+            if (!(Character.isDigit(str.charAt(i))) &&
+                    str.charAt(i) != '.' ||
+                    (str.charAt(i) == '-' && i > 0))
+                return false;
+            if (str.charAt(i) == '.')
+                hasDecimal = true;
+        }
+        return hasDecimal;
+    }
+
+    static String subString(String str, int left, int right) {
+        return str.substring(left, right + 1);
+    }
+
+    static void parse(String str) {
+        int left = 0, right = 0;
+        int len = str.length();
+        while (right < len && left <= right) {
+            if (!isDelimiter(str.charAt(right)))
+                right++;
+            if (isDelimiter(str.charAt(right)) && left == right) {
+                if (isOperator(str.charAt(right)))
+                    System.out.println("'" + str.charAt(right) + "' IS AN OPERATOR");
+                else  {
+	                System.out.println("'" + str.charAt(right) + "' IS A DELIMITER");
+	            }
+                right++;
+                left = right;
+            } else if (isDelimiter(str.charAt(right)) && left != right
+                    || (right == len && left != right)) {
+                String subStr = subString(str, left, right - 1);
+                if (isKeyword(subStr))
+                    System.out.println("'" + subStr + "' IS A KEYWORD");
+                else if (isInteger(subStr))
+                    System.out.println("'" + subStr + "' IS AN INTEGER");
+                else if (isRealNumber(subStr))
+                    System.out.println("'" + subStr + "' IS A REAL NUMBER");
+                else if (validIdentifier(subStr) && !isDelimiter(str.charAt(right - 1)))
+                    System.out.println("'" + subStr + "' IS A VALID IDENTIFIER");
+                else if (!validIdentifier(subStr) && !isDelimiter(str.charAt(right - 1)))
+                    System.out.println("'" + subStr + "' IS NOT A VALID IDENTIFIER");
+                left = right;
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+    	System.out.println("Enter the expression : ");
+    	Scanner s = new Scanner(System.in);
+    	String str = s.nextLine();
+        //String str = "int a=b+1c;";
+        parse(str);
+    }
+}
