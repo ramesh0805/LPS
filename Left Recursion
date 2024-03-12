@@ -1,0 +1,82 @@
+import java.util.*;
+
+public class LRR {
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Input grammar
+        Map<String, List<String>> grammar = new HashMap<>();
+
+        // Get the number of non-terminals
+        System.out.print("Enter the number of non-terminals: ");
+        int numNonTerminals = scanner.nextInt();
+        scanner.nextLine(); // Consume the newline character
+
+        // Get non-terminals and their productions
+        for (int i = 0; i < numNonTerminals; i++) {
+            System.out.print("Enter non-terminal " + (i + 1) + ": ");
+            String nonTerminal = scanner.nextLine();
+
+            System.out.print("Enter productions for " + nonTerminal + " separated by '|': ");
+            String productionsInput = scanner.nextLine();
+            List<String> productions = Arrays.asList(productionsInput.split("\\|"));
+
+            grammar.put(nonTerminal, productions);
+        }
+
+        scanner.close();
+
+        // Remove left recursion
+        Map<String, List<String>> newGrammar = removeLeftRecursion(grammar);
+
+        // Print the modified grammar
+        for (Map.Entry<String, List<String>> entry : newGrammar.entrySet()) {
+            System.out.println(entry.getKey() + " -> " + String.join(" | ", entry.getValue()));
+        }
+    }
+
+    private static Map<String, List<String>> removeLeftRecursion(Map<String, List<String>> grammar) {
+        Map<String, List<String>> newGrammar = new HashMap<>();
+
+        for (Map.Entry<String, List<String>> entry : grammar.entrySet()) {
+            String nonTerminal = entry.getKey();
+            List<String> productions = entry.getValue();
+
+            List<String> alpha = new ArrayList<>();
+            List<String> beta = new ArrayList<>();
+
+            boolean hasLeftRecursion = false;
+
+            for (String production : productions) {
+                String[] symbols = production.split(" ");
+                if (symbols[0].equals(nonTerminal)) {
+                    hasLeftRecursion = true;
+                    beta.add(String.join(" ", Arrays.copyOfRange(symbols, 1, symbols.length)));
+                } else {
+                    alpha.add(production);
+                }
+            }
+
+            if (hasLeftRecursion) {
+                List<String> newProductions = new ArrayList<>();
+                for (String production : alpha) {
+                    newProductions.add(production + " " + nonTerminal + "'");
+                }
+                newProductions.add("epsilon");
+                newGrammar.put(nonTerminal, newProductions);
+
+                List<String> newNonTerminalProductions = new ArrayList<>();
+                for (String production : beta) {
+                    newNonTerminalProductions.add(production + " " + nonTerminal + "'");
+                }
+                newNonTerminalProductions.add("epsilon");
+                newGrammar.put(nonTerminal + "'", newNonTerminalProductions);
+            } else {
+                newGrammar.put(nonTerminal, productions);
+            }
+        }
+
+        return newGrammar;
+    }
+}
